@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ms">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Stock Take</title>
+<meta name="robots" content="noindex">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
+<style>
+/* Layout: one narrow column — entry form, totals for the month, per-item settings, then the raw count log */
+:root{
+  --bg:#f3f6f5; --surface:#ffffff; --ink:#15302b; --muted:#5d7470; --line:#d6e0dd;
+  --accent:#0f7a66; --accent-ink:#ffffff; --accent-soft:#e1f1ec; --danger:#b3412f;
+  --danger-soft:#f8e3de; --warn:#8a5a00; --warn-soft:#fbefd2;
+  --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f1715; --surface:#17221f; --ink:#e3eeeb; --muted:#93aaa5; --line:#2a3a36;
+  --accent:#3fc2a4; --accent-ink:#06231c; --accent-soft:#1c3530; --danger:#ef8a77;
+  --danger-soft:#3a201b; --warn:#f0c060; --warn-soft:#3a2f14; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1715; --surface:#17221f; --ink:#e3eeeb; --muted:#93aaa5; --line:#2a3a36;
+  --accent:#3fc2a4; --accent-ink:#06231c; --accent-soft:#1c3530; --danger:#ef8a77;
+  --danger-soft:#3a201b; --warn:#f0c060; --warn-soft:#3a2f14; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{-webkit-text-size-adjust:100%}
+body{margin:0}
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.exp{display:inline-block;margin-top:3px;padding:1px 7px;border-radius:999px;font-size:11.5px;font-family:var(--mono);background:var(--accent-soft);color:var(--muted)}
+.exp.soon{background:var(--warn-soft);color:var(--warn);font-weight:600}
+.exp.past{background:var(--danger-soft);color:var(--danger);font-weight:600}
+.namecell{display:flex;flex-direction:column;align-items:flex-start}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.45}
+.wrap{max-width:760px;margin:0 auto;padding-block:20px 48px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  display:flex;flex-direction:column;gap:22px}
+header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
+h1{margin:0;font-size:24px;font-weight:700;letter-spacing:-.01em;text-wrap:balance}
+.sub{margin:2px 0 0;color:var(--muted);font-size:13px}
+label.mon,.fld{display:flex;flex-direction:column;gap:4px;font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);min-width:0}
+input,select,button{font:inherit;color:inherit}
+input,select{background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:10px 12px;min-width:0;width:100%}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.entry{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.row1{display:grid;grid-template-columns:1fr 100px 160px;gap:8px}
+.row2{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr auto;gap:8px;align-items:end}
+.brand{color:var(--muted);font-size:12.5px}
+td input.br{width:130px}
+.num{font-family:var(--mono);text-align:right}
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:10px 18px;font-weight:600;cursor:pointer;white-space:nowrap}
+.btn.ghost{background:transparent;color:var(--accent);border:1px solid var(--line);padding:8px 12px;font-weight:500}
+.hint{margin:0;font-size:12.5px;color:var(--muted)}
+.msg{font-size:13px;min-height:1.2em;color:var(--accent)}
+.msg.err{color:var(--danger)}
+section{display:flex;flex-direction:column;gap:10px}
+h2{margin:0;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.secthead{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.stat{font-size:13px;color:var(--muted)}
+.tablebox{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:10px 12px;text-align:left;border-bottom:1px solid var(--line);vertical-align:middle}
+tbody tr:last-child td{border-bottom:0}
+tfoot td{border-top:2px solid var(--line);border-bottom:0;font-weight:600}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600;white-space:nowrap}
+td.n,th.n{text-align:right;font-family:var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+td.total{font-weight:600;font-size:16px}
+td.acc{color:var(--accent)}
+.unset{color:var(--muted);font-weight:400}
+.parts{display:block;color:var(--muted);font-size:12px;font-family:var(--mono);font-weight:400}
+.tag{display:inline-block;margin-left:6px;padding:1px 7px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-size:11px;font-weight:600;letter-spacing:.03em;vertical-align:1px}
+td input,td select{padding:6px 8px;font-size:14px}
+td input.sm{width:76px;font-family:var(--mono);text-align:right}
+td input.md{width:90px;font-family:var(--mono);text-align:right}
+td select{width:auto}
+.empty{padding:22px 14px;color:var(--muted);text-align:center}
+.log ul{list-style:none;margin:0;padding:0}
+.log li{display:flex;align-items:center;gap:10px;padding:8px 14px;border-bottom:1px solid var(--line)}
+.log li:last-child{border-bottom:0}
+.log .nm{flex:1;min-width:0;overflow-wrap:anywhere}
+.log .q{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.log .t{color:var(--muted);font-size:12px;font-family:var(--mono)}
+.del{background:none;border:0;color:var(--danger);cursor:pointer;padding:4px 6px;font-size:13px}
+.edit{background:none;border:0;color:var(--accent);cursor:pointer;padding:4px 6px;font-size:13px}
+.log li.editing{flex-wrap:wrap;background:var(--accent-soft)}
+.log li.editing input{padding:6px 8px;font-size:14px}
+.log li.editing .en{flex:1 1 180px}
+.log li.editing .eq{flex:0 0 80px;font-family:var(--mono);text-align:right}
+.log li.editing .ee{flex:0 0 150px}
+.log li.editing .btn{padding:6px 14px}
+td input.nmi{width:190px}
+.note{font-size:12.5px;color:var(--muted);background:var(--accent-soft);border-radius:8px;padding:8px 12px;margin:0}
+@media (max-width:540px){th,td{padding:8px 7px}th,th.n{white-space:normal}td.total{font-size:15px}.row1{grid-template-columns:1fr 1fr}.row1 .fld:first-child{grid-column:1/-1}.row2{grid-template-columns:1fr 1fr}.row2 .fld:first-child,.row2 .btn{grid-column:1/-1}}
+</style>
+
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Stock Take</h1>
+      <p class="sub">Taip nama ubat dan bilangan. Nama yang sama dicampur sendiri.</p>
+    </div>
+    <label class="mon">Bulan
+      <select id="month"></select>
+    </label>
+  </header>
+
+  <form class="entry" id="form" autocomplete="off">
+    <div class="row1">
+      <label class="fld">Nama ubat / barang
+        <input id="name" list="names" placeholder="cth: Paracetamol 500mg" required>
+      </label>
+      <label class="fld">Bilangan
+        <input id="qty" class="num" type="number" inputmode="decimal" step="any" placeholder="0" required>
+      </label>
+      <label class="fld">Expiry (pilihan)
+        <input id="exp" type="date">
+      </label>
+    </div>
+    <div class="row2">
+      <label class="fld">Brand
+        <input id="brand" placeholder="cth: Panadol" maxlength="80">
+      </label>
+      <label class="fld">Jenis
+        <select id="type"></select>
+      </label>
+      <label class="fld">Berapa tablet dalam 1x
+        <input id="per" class="num" type="number" inputmode="decimal" step="any" min="0" placeholder="cth: 100">
+      </label>
+      <label class="fld">Harga beli 1x (RM)
+        <input id="price" class="num" type="number" inputmode="decimal" step="0.01" min="0" placeholder="0.00">
+      </label>
+      <button class="btn" type="submit">Tambah</button>
+    </div>
+    <datalist id="names"></datalist>
+    <p class="hint"><b>1x</b> = satu yang dikira (cth: 1 kotak). Contoh: 1 kotak = 100 tablet, harga beli RM 12 → 8 kotak = 800 tablet, RM 96.<br>Brand, jenis, tablet dan harga isi sekali je. Expiry pilihan; batch lain, taip berasingan. Tolak guna nombor negatif (-2).</p>
+    <div class="msg" id="msg" role="status"></div>
+  </form>
+
+  <p class="note" id="storeNote" hidden></p>
+
+  <section>
+    <div class="secthead">
+      <h2>Jumlah bulan ni</h2>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span class="stat" id="stat"></span>
+        <button class="btn ghost" type="button" id="copy">Salin senarai</button>
+      </div>
+    </div>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Ubat</th><th class="n">Jumlah</th><th class="n">Jumlah tablet</th><th class="n">Nilai (RM)</th></tr></thead>
+        <tbody id="totals"><tr><td colspan="4" class="empty">Memuatkan…</td></tr></tbody>
+        <tfoot id="foot" hidden><tr><td colspan="3">Jumlah nilai stok</td><td class="n acc" id="grand"></td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Maklumat ubat (brand, jenis, tablet, harga)</h2>
+    <div class="tablebox">
+      <table>
+        <thead><tr><th>Ubat</th><th>Brand</th><th>Jenis</th><th class="n">Tablet dalam 1x</th><th class="n">Harga beli 1x (RM)</th><th class="n">Harga setablet (dikira)</th></tr></thead>
+        <tbody id="info"><tr><td colspan="6" class="empty">Ubat akan keluar di sini lepas kiraan pertama.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="log">
+    <h2>Semua kiraan</h2>
+    <div class="tablebox"><ul id="log"><li class="empty" style="justify-content:center">Belum ada kiraan.</li></ul></div>
+  </section>
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
