@@ -2,7 +2,7 @@
 window.STOCKTAKE_CONFIG = {
   // Nama klinik dan logo (fail gambar dalam folder ni, cth "logo.png"). Kosongkan logo kalau tiada.
   clinicName: "Mediviron Kota Masai",
-  logo: "",
+  logo: "logo.png",
 
   // Accountant: butang "Hantar ke accountant" guna nombor dan email ni.
   accountantPhone: "010-270 6415",

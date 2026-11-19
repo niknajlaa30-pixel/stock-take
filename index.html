@@ -5,28 +5,30 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Stock Take</title>
 <meta name="robots" content="noindex">
+<link rel="icon" href="logo.png">
+<meta name="theme-color" content="#3b3b9c">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap">
 <style>
 /* Layout: one narrow column — entry form, totals for the month, per-item settings, then the raw count log */
 :root{
-  --bg:#f3f6f5; --surface:#ffffff; --ink:#15302b; --muted:#5d7470; --line:#d6e0dd;
-  --accent:#0f7a66; --accent-ink:#ffffff; --accent-soft:#e1f1ec; --danger:#b3412f;
+  --bg:#f4f4f9; --surface:#ffffff; --ink:#1c1c3f; --muted:#5e5f80; --line:#dadbea;
+  --accent:#3b3b9c; --accent-ink:#ffffff; --accent-soft:#e8e8f6; --danger:#b3412f;
   --danger-soft:#f8e3de; --warn:#8a5a00; --warn-soft:#fbefd2;
   --sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --bg:#0f1715; --surface:#17221f; --ink:#e3eeeb; --muted:#93aaa5; --line:#2a3a36;
-  --accent:#3fc2a4; --accent-ink:#06231c; --accent-soft:#1c3530; --danger:#ef8a77;
+  --bg:#121224; --surface:#1b1b32; --ink:#e7e7f6; --muted:#9e9fbe; --line:#2e2f4c;
+  --accent:#a9a8f4; --accent-ink:#15153b; --accent-soft:#272752; --danger:#ef8a77;
   --danger-soft:#3a201b; --warn:#f0c060; --warn-soft:#3a2f14; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f1715; --surface:#17221f; --ink:#e3eeeb; --muted:#93aaa5; --line:#2a3a36;
-  --accent:#3fc2a4; --accent-ink:#06231c; --accent-soft:#1c3530; --danger:#ef8a77;
+  --bg:#121224; --surface:#1b1b32; --ink:#e7e7f6; --muted:#9e9fbe; --line:#2e2f4c;
+  --accent:#a9a8f4; --accent-ink:#15153b; --accent-soft:#272752; --danger:#ef8a77;
   --danger-soft:#3a201b; --warn:#f0c060; --warn-soft:#3a2f14; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 .brandrow{display:flex;align-items:center;gap:12px}
-.logo{height:48px;width:auto;max-width:160px;object-fit:contain}
+.logo{height:64px;width:auto;max-width:120px;object-fit:contain;background:#f4f4f4;border-radius:10px;padding:6px 8px}
 .clinic{margin:0;font-size:13px;font-weight:600;color:var(--accent)}
 .sendbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
 .contact{margin:0;font-size:14px;overflow-wrap:anywhere}

@@ -251,7 +251,7 @@
     $("sendWa").addEventListener("click",ev=>go("wa",ev));
     $("sendMail").addEventListener("click",ev=>go("mail",ev));
   }
-  if(clinic){$("clinic").textContent=clinic;$("clinic").hidden=false;document.title="Stock Take · "+clinic;}
+  if(clinic){$("clinic").textContent=clinic;$("clinic").hidden=!!CONF.logo;document.title="Stock Take · "+clinic;}
   if(CONF.logo){const im=$("logo");im.src=CONF.logo;im.alt=clinic||"Logo";im.hidden=false;}
 
   // Local fallback (signed out, or store unreachable)
