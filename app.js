@@ -216,15 +216,43 @@
     nameIn.value="";qtyIn.value="";expIn.value="";typeIn.value="";brandIn.value="";perIn.value="";priceIn.value="";nameIn.focus();
   });
 
-  $("copy").addEventListener("click",async()=>{
-    const [y,m]=monthSel.value.split("-");
-    const lines=lastRows.map(r=>{let s=r.name+(r.brand?" ("+r.brand+")":"")+": "+fmt(r.total)+(r.type?" "+r.type:"");
+  const CONF=window.STOCKTAKE_CONFIG||{};
+  const clinic=CONF.clinicName||"";
+  function monthLabel(){const [y,m]=monthSel.value.split("-");return MONTHS[+m-1]+" "+y;}
+  function reportText(){
+    const lines=lastRows.map(r=>{let s="- "+r.name+(r.brand?" ("+r.brand+")":"")+": "+fmt(r.total)+(r.type?" "+r.type:"");
       if(r.isi!=null) s+=" ("+fmt(r.isi)+" tablet)"; if(r.value!=null) s+=" = RM "+rm(r.value);
       if(r.exp) s+=" · exp "+fmtDate(r.exp); return s;});
-    const text="Stok "+MONTHS[+m-1]+" "+y+"\n"+lines.join("\n")+(lastGrand!=null?"\nJumlah nilai: RM "+rm(lastGrand):"");
+    return "Stock take "+monthLabel()+(clinic?" - "+clinic:"")+"\n\n"+lines.join("\n")+(lastGrand!=null?"\n\nJumlah nilai stok: RM "+rm(lastGrand):"");
+  }
+  $("copy").addEventListener("click",async()=>{
+    const text=reportText();
     try{await navigator.clipboard.writeText(text);say("Senarai disalin. Boleh tampal dalam WhatsApp.");}
     catch(e){say("Tak dapat salin terus. "+text.replace(/\n/g," · "),true);}
   });
+
+  // Send to accountant: opens WhatsApp or the mail app with the report already written; the user taps Send there.
+  const waNum=String(CONF.accountantPhone||"").replace(/\D/g,"").replace(/^0/,"60");
+  const mail=String(CONF.accountantEmail||"");
+  if(waNum||mail){
+    $("sendSec").hidden=false;
+    $("accPhone").textContent=CONF.accountantPhone||"";$("accEmail").textContent=mail;
+    $("sendWa").hidden=!waNum;$("sendMail").hidden=!mail;
+    const go=(kind,ev)=>{
+      if(!lastRows.length){ev.preventDefault();say("Belum ada kiraan untuk "+monthLabel()+". Kira dulu sebelum hantar.",true);return;}
+      const text=reportText();
+      try{navigator.clipboard.writeText(text).catch(()=>{});}catch(e){}
+      const subj="Stock take "+monthLabel()+(clinic?" - "+clinic:"");
+      ev.currentTarget.href = kind==="wa"
+        ? "https://wa.me/"+waNum+"?text="+encodeURIComponent(text)
+        : "mailto:"+mail+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(text);
+      say("Laporan dibuka dalam "+(kind==="wa"?"WhatsApp":"email")+". Semak dan tekan Send. (Laporan juga dah disalin, boleh tampal kalau terpotong.)");
+    };
+    $("sendWa").addEventListener("click",ev=>go("wa",ev));
+    $("sendMail").addEventListener("click",ev=>go("mail",ev));
+  }
+  if(clinic){$("clinic").textContent=clinic;$("clinic").hidden=false;document.title="Stock Take · "+clinic;}
+  if(CONF.logo){const im=$("logo");im.src=CONF.logo;im.alt=clinic||"Logo";im.hidden=false;}
 
   // Local fallback (signed out, or store unreachable)
   function useLocal(note){

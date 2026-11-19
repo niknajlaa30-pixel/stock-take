@@ -25,6 +25,14 @@
   --danger-soft:#3a201b; --warn:#f0c060; --warn-soft:#3a2f14; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+.brandrow{display:flex;align-items:center;gap:12px}
+.logo{height:48px;width:auto;max-width:160px;object-fit:contain}
+.clinic{margin:0;font-size:13px;font-weight:600;color:var(--accent)}
+.sendbox{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px;display:flex;flex-direction:column;gap:10px}
+.contact{margin:0;font-size:14px;overflow-wrap:anywhere}
+.mono{font-family:var(--mono)}
+.sendbtns{display:flex;flex-wrap:wrap;gap:8px}
+a.btn{text-decoration:none;display:inline-block;text-align:center}
 html{-webkit-text-size-adjust:100%}
 body{margin:0}
 :root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -99,7 +107,7 @@ td input.nmi{width:190px}
 <div class="wrap">
   <header>
     <div>
-      <h1>Stock Take</h1>
+      <div class="brandrow"><img id="logo" class="logo" alt="" hidden><div><h1>Stock Take</h1><p class="clinic" id="clinic" hidden></p></div></div>
       <p class="sub">Taip nama ubat dan bilangan. Nama yang sama dicampur sendiri.</p>
     </div>
     <label class="mon">Bulan
@@ -165,6 +173,18 @@ td input.nmi{width:190px}
         <thead><tr><th>Ubat</th><th>Brand</th><th>Jenis</th><th class="n">Tablet dalam 1x</th><th class="n">Harga beli 1x (RM)</th><th class="n">Harga setablet (dikira)</th></tr></thead>
         <tbody id="info"><tr><td colspan="6" class="empty">Ubat akan keluar di sini lepas kiraan pertama.</td></tr></tbody>
       </table>
+    </div>
+  </section>
+
+  <section id="sendSec" hidden>
+    <h2>Hantar ke accountant</h2>
+    <div class="sendbox">
+      <p class="contact">Accountant · <span class="mono" id="accPhone"></span> · <span id="accEmail"></span></p>
+      <div class="sendbtns">
+        <a class="btn" id="sendWa" href="#" target="_blank" rel="noopener">Hantar WhatsApp</a>
+        <a class="btn ghost" id="sendMail" href="#">Hantar email</a>
+      </div>
+      <p class="hint">Butang ni buka WhatsApp atau email dengan laporan bulan yang dipilih dah siap ditulis. Semak, kemudian tekan Send.</p>
     </div>
   </section>
 
